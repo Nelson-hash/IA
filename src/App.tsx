@@ -169,8 +169,10 @@ function App() {
             <video
               src={currentPair.left.url}
               className="w-full h-full object-cover"
-              controls
+              autoPlay
+              muted
               playsInline
+              loop
             />
           </button>
 
@@ -183,8 +185,10 @@ function App() {
             <video
               src={currentPair.right.url}
               className="w-full h-full object-cover"
-              controls
+              autoPlay
+              muted
               playsInline
+              loop
             />
           </button>
         </div>
