@@ -159,7 +159,7 @@ function App() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 gap-4 h-[calc(100vh-8rem)]">
+        <div className="grid grid-cols-2 gap-4 h-[calc(100vh-12rem)]">
           {/* Left Video */}
           <button
             onClick={() => handleChoice(true)}
@@ -193,12 +193,11 @@ function App() {
           </button>
         </div>
 
-        {/* Round indicator */}
-        <div className="text-center mt-6">
-          <p className="text-lg font-medium flex items-center justify-center gap-2">
-            Round {currentRound + 1} of {videoData.length}
-            <ChevronRight className="w-5 h-5" />
-          </p>
+        {/* Question text */}
+        <div className="text-center mt-8">
+          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            SAUREZ-VOUS TROUVER LAQUELLE DE CES DEUX VIDÉOS A ÉTÉ GÉNÉRÉE PAR IA ?
+          </h2>
         </div>
       </div>
     </div>
