@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Trophy } from 'lucide-react';
+import { Trophy, Brain, ThumbsDown } from 'lucide-react';
 
 const videoData = [
   {
@@ -125,22 +125,64 @@ function App() {
   };
 
   if (gameComplete) {
+    let message = "";
+    let emoji = "";
+    let Icon = Trophy;
+    let gradientColors = "from-purple-600 to-blue-600";
+    let iconColor = "text-yellow-500";
+    let newsletterMessage = "";
+
+    if (score >= 7) {
+      message = "Bravo, vous avez l'œil affûté, les robots ne vous auront pas tout de suite ! 🎯";
+      emoji = "🦅";
+      Icon = Trophy;
+      gradientColors = "from-green-600 to-teal-600";
+      iconColor = "text-yellow-500";
+      newsletterMessage = "Si vous voulez rester un expert, suivez notre newsletter :";
+    } else if (score >= 5) {
+      message = "Mouais, pas beaucoup mieux que le hasard... 🎲";
+      emoji = "🤔";
+      Icon = Brain;
+      gradientColors = "from-orange-600 to-yellow-600";
+      iconColor = "text-orange-500";
+      newsletterMessage = "Si vous voulez en savoir plus, suivez notre newsletter :";
+    } else {
+      message = "Ah... Oui on en est là... 🤖";
+      emoji = "😅";
+      Icon = ThumbsDown;
+      gradientColors = "from-red-600 to-pink-600";
+      iconColor = "text-red-500";
+      newsletterMessage = "Si vous voulez tout de suite vous mettre à la page, suivez notre newsletter :";
+    }
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+      <div className={`min-h-screen bg-gradient-to-br ${gradientColors} flex items-center justify-center`}>
         <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full mx-4">
-          <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Game Complete!</h2>
-          <p className="text-xl mb-6">Your Score: {score} / {videoData.length}</p>
+          <Icon className={`w-16 h-16 mx-auto ${iconColor} mb-4`} />
+          <div className="text-6xl mb-4">{emoji}</div>
+          <h2 className="text-2xl font-bold mb-4">{message}</h2>
+          <p className="text-xl mb-6">Score: {score} / {videoData.length}</p>
           <button
             onClick={() => {
               setCurrentRound(0);
               setScore(0);
               setGameComplete(false);
             }}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+            className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
           >
-            Play Again
+            Rejouer
           </button>
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-gray-600 mb-2">{newsletterMessage}</p>
+            <a
+              href="https://ia-vengersnewen.beehiiv.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-block bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity`}
+            >
+              S'inscrire à la newsletter
+            </a>
+          </div>
         </div>
       </div>
     );
