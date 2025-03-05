@@ -23,31 +23,31 @@ const videoData = [
     }
   },
   {
-    left: {
+    right: {
       url: "/videos/IA-3.mp4",
       correct: true
     },
-    right: {
+    left: {
       url: "/videos/Reel-3.mp4",
       correct: false
     }
   },
   {
-    left: {
+    right: {
       url: "/videos/IA-4.mp4",
       correct: true
     },
-    right: {
+    left: {
       url: "/videos/Reel-4.mp4",
       correct: false
     }
   },
   {
-    left: {
+    right: {
       url: "/videos/IA-5.mp4",
       correct: true
     },
-    right: {
+    left: {
       url: "/videos/Reel-5.mp4",
       correct: false
     }
