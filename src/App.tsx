@@ -81,26 +81,6 @@ const videoData = [
       url: "/videos/Reel-8.mp4",
       correct: false
     }
-  },
-  {
-    left: {
-      url: "/videos/IA-9.mp4",
-      correct: true
-    },
-    right: {
-      url: "/videos/Reel-9.mp4",
-      correct: false
-    }
-  },
-  {
-    left: {
-      url: "/videos/IA-10.mp4",
-      correct: true
-    },
-    right: {
-      url: "/videos/Reel-10.mp4",
-      correct: false
-    }
   }
 ];
 
@@ -132,14 +112,14 @@ function App() {
     let iconColor = "text-yellow-500";
     let newsletterMessage = "";
 
-    if (score >= 7) {
+    if (score >= 6) {
       message = "Bravo, vous avez l'œil affûté, les robots ne vous auront pas tout de suite ! 🎯";
       emoji = "🦅";
       Icon = Trophy;
       gradientColors = "from-green-600 to-teal-600";
       iconColor = "text-yellow-500";
       newsletterMessage = "Si vous voulez rester un expert, suivez notre newsletter :";
-    } else if (score >= 5) {
+    } else if (score >= 4) {
       message = "Mouais, pas beaucoup mieux que le hasard... 🎲";
       emoji = "🤔";
       Icon = Brain;
