@@ -4,9 +4,9 @@
 
 .logo {
   position: absolute !important;
-  top: 16px !important; /* Ajuste la position verticale */
+  top: 8px !important; /* Ajuste la position verticale */
   left: 16px !important; /* Ajuste la position horizontale */
   z-index: 10 !important; /* Assure que le logo reste au-dessus des autres éléments */
-  width: 64px !important; /* Largeur du logo, à ajuster */
+  width: 192px !important; /* Largeur du logo, à ajuster */
   height: auto !important; /* Conserve le ratio d'aspect */
 }
