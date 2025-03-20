@@ -1,21 +1,5 @@
 import React, { useState } from 'react';
 import { Trophy, Brain, ThumbsDown } from 'lucide-react';
-// logo
-import React from 'react';
-import './App.css';
-
-const App: React.FC = () => {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src="/images/logo.png" alt="Logo" className="logo" />
-      </header>
-    </div>
-  );
-}
-
-export default App;
-//
 
 const videoData = [
   {
