@@ -182,7 +182,7 @@ function App() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Logo */}
-        <div className="absolute top-2 left-4 z-10">
+        <div className="absolute top-0 left-4 z-10">
           <img src="/images/logo.png" alt="Logo" className="w-32 h-auto" />
         </div>
         
