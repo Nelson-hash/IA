@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.App-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+}
+
+.logo {
+  width: 50px; /* Ajuste la taille du logo à ta préférence */
+  height: auto;
+}
