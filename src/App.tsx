@@ -181,6 +181,12 @@ function App() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Logo */}
+        <div className="absolute top-4 left-4 z-10">
+          <img src="/images/logo.png" alt="Logo" className="w-16 h-auto" />
+        </div>
+        
+        {/* Video Selection */}
         <div className="grid grid-cols-2 gap-4 h-[calc(100vh-12rem)]">
           {/* Left Video */}
           <button
