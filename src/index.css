@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.logo {
+  position: absolute;
+  top: 16px; /* Adjust the vertical position */
+  left: 16px; /* Adjust the horizontal position */
+  z-index: 10; /* Ensures the logo stays on top */
+  width: 64px; /* Logo width, change as necessary */
+  height: auto; /* Maintain aspect ratio */
+}
