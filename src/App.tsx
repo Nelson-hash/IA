@@ -84,7 +84,9 @@ const videoData = [
   }
 ];
 
-function App() {
+
+// Main App component
+const App = () => {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
@@ -107,20 +109,6 @@ function App() {
     return () => clearTimeout(timer);
   }, [timeLeft, gameComplete]);
 
-  const handleChoice = (isLeft) => {
-    const currentPair = videoData[currentRound];
-    const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
-    
-    if (isCorrect) {
-      setScore(prev => prev + 1);
-    }
-
-    if (currentRound === videoData.length - 1) {
-      setGameComplete(true);
-    } else {
-      setCurrentRound(prev => prev + 1);
-    }
-  };
 
 
 
