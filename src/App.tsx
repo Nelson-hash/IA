@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Brain, ThumbsDown } from 'lucide-react';
 
 const videoData = [
@@ -84,8 +84,6 @@ const videoData = [
   }
 ];
 
-
-
 function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -109,29 +107,6 @@ function App() {
   }, [timeLeft, gameComplete]);
 
   const handleChoice = (isLeft) => {
-    const currentPair = videoData[currentRound];
-    const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
-    
-    if (isCorrect) {
-      setScore(prev => prev + 1);
-    }
-
-    if (currentRound === videoData.length - 1) {
-      setGameComplete(true);
-    } else {
-      setCurrentRound(prev => prev + 1);
-    }
-  };
-
-
-
-
-function App() {
-  const [currentRound, setCurrentRound] = useState(0);
-  const [score, setScore] = useState(0);
-  const [gameComplete, setGameComplete] = useState(false);
-
-  const handleChoice = (isLeft: boolean) => {
     const currentPair = videoData[currentRound];
     const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
     
@@ -189,6 +164,7 @@ function App() {
               setCurrentRound(0);
               setScore(0);
               setGameComplete(false);
+              setTimeLeft(60);
             }}
             className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
           >
@@ -226,6 +202,13 @@ function App() {
         {/* Logo */}
         <div className="absolute top-0 left-4 z-10">
           <img src="/images/logo.png" alt="Logo" className="w-32 h-auto" />
+        </div>
+        
+        {/* Timer - Bottom Left */}
+        <div className="fixed bottom-6 left-6 z-10 bg-black bg-opacity-50 px-4 py-2 rounded-full">
+          <div className={`font-mono text-xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-white'}`}>
+            {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60}
+          </div>
         </div>
         
         {/* Video Selection */}
