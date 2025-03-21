@@ -84,6 +84,55 @@ const videoData = [
   }
 ];
 
+  // Timer effect
+  useEffect(() => {
+    let timer = null;
+    
+    if (timerActive && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && !gameComplete) {
+      // Time's up, end the game
+      setGameComplete(true);
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [timerActive, timeLeft, gameComplete]);
+
+  const handleChoice = (isLeft: boolean) => {
+    const currentPair = videoData[currentRound];
+    const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
+    
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+    }
+
+    if (currentRound === videoData.length - 1) {
+      setGameComplete(true);
+      setTimerActive(false);
+    } else {
+      setCurrentRound(prev => prev + 1);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const resetGame = () => {
+    setCurrentRound(0);
+    setScore(0);
+    setGameComplete(false);
+    setTimeLeft(60);
+    setTimerActive(true);
+  };
+
+
 function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
