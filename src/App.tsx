@@ -85,29 +85,43 @@ const videoData = [
 ];
 
 
-// Main App component
-const App = () => {
+
+function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // 60 seconds timer
+  const [timeLeft, setTimeLeft] = useState(60);
 
-  // Simple timer
   useEffect(() => {
-    // Only run timer during active gameplay
-    if (gameComplete) return;
+    let timerId;
     
-    const timer = setTimeout(() => {
-      if (timeLeft > 0) {
+    if (!gameComplete && timeLeft > 0) {
+      timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
-      } else {
-        // Time's up
-        setGameComplete(true);
-      }
-    }, 1000);
+      }, 1000);
+    } else if (timeLeft === 0 && !gameComplete) {
+      setGameComplete(true);
+    }
     
-    return () => clearTimeout(timer);
+    return () => {
+      if (timerId) clearTimeout(timerId);
+    };
   }, [timeLeft, gameComplete]);
+
+  const handleChoice = (isLeft) => {
+    const currentPair = videoData[currentRound];
+    const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
+    
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+    }
+
+    if (currentRound === videoData.length - 1) {
+      setGameComplete(true);
+    } else {
+      setCurrentRound(prev => prev + 1);
+    }
+  };
 
 
 
