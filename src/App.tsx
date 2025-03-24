@@ -5,21 +5,21 @@ const videoData = [
     {
     left: {
       url: "/videos/mendiantV.mp4",
-      correct: true
+      correct: false
     },
     right: {
       url: "/videos/mendiantF.mp4",
-      correct: false
+      correct: true
     }
   },
     {
     left: {
       url: "/videos/mendiantV2.mp4",
-      correct: true
+      correct: false
     },
     right: {
       url: "/videos/mendiantF2.mp4",
-      correct: false
+      correct: true
     }
   },
   {
