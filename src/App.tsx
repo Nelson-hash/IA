@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { Trophy, Brain, ThumbsDown } from 'lucide-react';
 
 const videoData = [
+    {
+    left: {
+      url: "/videos/mendiantV.mp4",
+      correct: true
+    },
+    right: {
+      url: "/videos/mendiantF.mp4",
+      correct: false
+    }
   {
     left: {
       url: "/videos/IA-1.mp4",
