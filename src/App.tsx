@@ -12,6 +12,16 @@ const videoData = [
       correct: false
     }
   },
+    {
+    left: {
+      url: "/videos/mendiantV2.mp4",
+      correct: true
+    },
+    right: {
+      url: "/videos/mendiantF2.mp4",
+      correct: false
+    }
+  },
   {
     left: {
       url: "/videos/IA-1.mp4",
