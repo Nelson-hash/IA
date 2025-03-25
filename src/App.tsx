@@ -178,7 +178,7 @@ function App() {
               rel="noopener noreferrer"
               className={`inline-block bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity`}
             >
-              S'inscrire à notre super newsletter
+              S'inscrire à notre newsletter
             </a>
           </div>
         </div>
