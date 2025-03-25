@@ -88,7 +88,8 @@ function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(120); // Changed to 2 minutes (120 seconds)
+  const [mistakes, setMistakes] = useState([]);
 
   useEffect(() => {
     let timerId;
@@ -110,7 +111,14 @@ function App() {
     const currentPair = videoData[currentRound];
     const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
     
-    if (isCorrect) {
+    if (!isCorrect) {
+      // Track mistakes
+      setMistakes(prev => [...prev, {
+        round: currentRound + 1,
+        video: isLeft ? currentPair.left.url : currentPair.right.url,
+        correctVideo: isLeft ? currentPair.right.url : currentPair.left.url
+      }]);
+    } else {
       setScore(prev => prev + 1);
     }
 
@@ -159,12 +167,26 @@ function App() {
           <div className="text-6xl mb-4">{emoji}</div>
           <h2 className="text-2xl font-bold mb-4">{message}</h2>
           <p className="text-xl mb-6">Score: {score} / {videoData.length}</p>
+          
+          {/* Mistakes Overview */}
+          {mistakes.length > 0 && (
+            <div className="bg-gray-100 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold mb-3">Vos erreurs :</h3>
+              {mistakes.map((mistake, index) => (
+                <div key={index} className="mb-2 text-sm">
+                  <p>Ronde {mistake.round}: Vous avez choisi le mauvais clip vidéo</p>
+                </div>
+              ))}
+            </div>
+          )}
+          
           <button
             onClick={() => {
               setCurrentRound(0);
               setScore(0);
               setGameComplete(false);
-              setTimeLeft(60);
+              setTimeLeft(120);
+              setMistakes([]);
             }}
             className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
           >
