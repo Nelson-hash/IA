@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Brain, ThumbsDown } from 'lucide-react';
+import { Trophy, Brain, ThumbsDown, X } from 'lucide-react';
 
 const videoData = [
   {
@@ -88,7 +88,7 @@ function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
   const [gameComplete, setGameComplete] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120); // Changed to 2 minutes (120 seconds)
+  const [timeLeft, setTimeLeft] = useState(180);
   const [mistakes, setMistakes] = useState([]);
 
   useEffect(() => {
@@ -168,15 +168,25 @@ function App() {
           <h2 className="text-2xl font-bold mb-4">{message}</h2>
           <p className="text-xl mb-6">Score: {score} / {videoData.length}</p>
           
-          {/* Mistakes Overview */}
+          {/* Mistakes Overview with Video Thumbnails */}
           {mistakes.length > 0 && (
             <div className="bg-gray-100 rounded-lg p-4 mb-6">
               <h3 className="text-lg font-semibold mb-3">Vos erreurs :</h3>
-              {mistakes.map((mistake, index) => (
-                <div key={index} className="mb-2 text-sm">
-                  <p>Ronde {mistake.round}: Vous avez choisi le mauvais clip vidéo</p>
-                </div>
-              ))}
+              <div className="grid grid-cols-2 gap-4">
+                {mistakes.map((mistake, index) => (
+                  <div key={index} className="relative">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                      <X className="w-16 h-16 text-red-500 bg-white/70 rounded-full p-2" />
+                    </div>
+                    <video
+                      src={mistake.video}
+                      className="w-full h-32 object-cover rounded-lg opacity-70"
+                      muted
+                    />
+                    <p className="text-xs mt-2">Ronde {mistake.round}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
           
@@ -185,7 +195,7 @@ function App() {
               setCurrentRound(0);
               setScore(0);
               setGameComplete(false);
-              setTimeLeft(120);
+              setTimeLeft(180);
               setMistakes([]);
             }}
             className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
