@@ -183,7 +183,7 @@ function App() {
                       className="w-full h-32 object-cover rounded-lg opacity-70"
                       muted
                     />
-                    <p className="text-xs mt-2">Ronde {mistake.round}</p>
+                    <p className="text-xs mt-2">Choix {mistake.round}</p>
                   </div>
                 ))}
               </div>
