@@ -285,7 +285,7 @@ function App() {
           </h2>
         </div>
       </div>
-    </div>
+      
         {/* Text - Bottom Right */}
       <div className="fixed bottom-4 right-4 z-10 text-gray-400 text-sm opacity-50 font-mono">
         Vidéos conçues par Siloé Ralite / Site web par Nelson Remy
