@@ -121,19 +121,12 @@ function App() {
     } else {
       setScore(prev => prev + 1);
     }
+
     if (currentRound === videoData.length - 1) {
       setGameComplete(true);
     } else {
       setCurrentRound(prev => prev + 1);
     }
-  };
-
-  const resetGame = () => {
-    setCurrentRound(0);
-    setScore(0);
-    setGameComplete(false);
-    setTimeLeft(180);
-    setMistakes([]);
   };
 
   if (gameComplete) {
@@ -168,38 +161,57 @@ function App() {
     }
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900 text-white">
-        <div className="text-center max-w-md">
+      <div className={`min-h-screen bg-gradient-to-br ${gradientColors} flex items-center justify-center`}>
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full mx-4">
+          <Icon className={`w-16 h-16 mx-auto ${iconColor} mb-4`} />
           <div className="text-6xl mb-4">{emoji}</div>
-          <div className="text-2xl mb-4">{message}</div>
-          <div className="text-xl mb-6">Score: {score} / {videoData.length}</div>
-
+          <h2 className="text-2xl font-bold mb-4">{message}</h2>
+          <p className="text-xl mb-6">Score: {score} / {videoData.length}</p>
+          
           {/* Mistakes Overview with Video Thumbnails */}
           {mistakes.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-4">Vos erreurs :</h3>
+            <div className="bg-gray-100 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold mb-3">Vos erreurs :</h3>
               <div className="grid grid-cols-2 gap-4">
                 {mistakes.map((mistake, index) => (
-                  <div key={index} className="bg-gray-700 p-4 rounded-lg">
-                    <div className="mb-2">Choix {mistake.round}</div>
+                  <div key={index} className="relative">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                      <X className="w-16 h-16 text-red-500 bg-white/70 rounded-full p-2" />
+                    </div>
+                    <video
+                      src={mistake.video}
+                      className="w-full h-32 object-cover rounded-lg opacity-70"
+                      muted
+                    />
+                    <p className="text-xs mt-2">Choix {mistake.round}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
           
-          <button 
-            onClick={resetGame}
+          <button
+            onClick={() => {
+              setCurrentRound(0);
+              setScore(0);
+              setGameComplete(false);
+              setTimeLeft(180);
+              setMistakes([]);
+            }}
             className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
           >
             Rejouer
           </button>
-
-          <div className="mt-4">
-            <div>{newsletterMessage}</div>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg mt-2">
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-gray-600 mb-2">{newsletterMessage}</p>
+            <a
+              href="https://ia-vengersnewen.beehiiv.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-block bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity`}
+            >
               S'inscrire à notre newsletter
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -207,62 +219,80 @@ function App() {
   }
 
   const currentPair = videoData[currentRound];
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-r from-gray-800 to-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Progress bar */}
-      <div className="w-full h-2 bg-gray-700">
+      <div className="fixed top-0 left-0 w-full h-2 bg-gray-800">
         <div 
-          className="h-full bg-blue-500" 
-          style={{width: `${((currentRound + 1) / videoData.length) * 100}%`}}
-        ></div>
+          className="h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-300"
+          style={{ width: `${(currentRound / videoData.length) * 100}%` }}
+        />
       </div>
 
-      <div className="flex-grow flex flex-col justify-between p-6">
+      <div className="container mx-auto px-4 py-8">
         {/* Logo */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">IA ou Réel ?</h1>
+        <div className="absolute top-0 left-4 z-10">
+          <img src="/images/logo.png" alt="Logo" className="w-32 h-auto" />
         </div>
         
         {/* Timer - Bottom Left */}
-        <div className="absolute top-4 right-4">
-          <div className="text-xl font-mono">
+        <div className="fixed bottom-6 left-6 z-10 bg-black bg-opacity-50 px-4 py-2 rounded-full">
+          <div className={`font-mono text-xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-white'}`}>
             {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60}
           </div>
         </div>
         
         {/* Video Selection */}
-        <div className="flex justify-center space-x-8 mb-8">
+        <div className="grid grid-cols-2 gap-4 h-[calc(100vh-12rem)]">
           {/* Left Video */}
-          <button 
+          <button
             onClick={() => handleChoice(true)}
             className="relative group overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
           >
-            <video src={currentPair.left.url} className="w-64 h-96 object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <video
+              src={currentPair.left.url}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              playsInline
+              loop
+            />
           </button>
 
           {/* Right Video */}
-          <button 
+          <button
             onClick={() => handleChoice(false)}
             className="relative group overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
           >
-            <video src={currentPair.right.url} className="w-64 h-96 object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-l from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <video
+              src={currentPair.right.url}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              playsInline
+              loop
+            />
           </button>
         </div>
 
         {/* Question text */}
-        <div className="text-center mb-8">
-          <p className="text-xl font-semibold">
+        <div className="text-center mt-8">
+          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             SAUREZ-VOUS TROUVER LAQUELLE DE CES DEUX VIDÉOS A ÉTÉ GÉNÉRÉE PAR IA ?
-          </p>
+          </h2>
         </div>
-      </div>
-
-      {/* Text - Bottom Right */}
-      <div className="absolute bottom-4 right-4 text-sm text-gray-400">
-        Vidéos conçues par Siloé Ralite / Site web par Nelson Remy
       </div>
     </div>
   );
+
+        {/* Text - Bottom Right */}
+      <div className="fixed bottom-4 right-4 z-10 text-gray-400 text-sm opacity-50 font-mono">
+        Vidéos conçues par Siloé Ralite / Site web par Nelson Remy
+      </div>
+    </div>
 }
 
 export default App;
