@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Brain, ThumbsDown, X } from 'lucide-react';
+import { Trophy, Brain, ThumbsDown, X, Play, ShieldAlert } from 'lucide-react';
 
 const videoData = [
   {
@@ -90,22 +90,23 @@ function App() {
   const [gameComplete, setGameComplete] = useState(false);
   const [timeLeft, setTimeLeft] = useState(180);
   const [mistakes, setMistakes] = useState([]);
+  const [gameStarted, setGameStarted] = useState(false);
 
   useEffect(() => {
     let timerId;
     
-    if (!gameComplete && timeLeft > 0) {
+    if (gameStarted && !gameComplete && timeLeft > 0) {
       timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-    } else if (timeLeft === 0 && !gameComplete) {
+    } else if (timeLeft === 0 && !gameComplete && gameStarted) {
       setGameComplete(true);
     }
     
     return () => {
       if (timerId) clearTimeout(timerId);
     };
-  }, [timeLeft, gameComplete]);
+  }, [timeLeft, gameComplete, gameStarted]);
 
   const handleChoice = (isLeft) => {
     const currentPair = videoData[currentRound];
@@ -128,6 +129,54 @@ function App() {
       setCurrentRound(prev => prev + 1);
     }
   };
+
+  const startGame = () => {
+    setGameStarted(true);
+  };
+
+  const resetGame = () => {
+    setCurrentRound(0);
+    setScore(0);
+    setGameComplete(false);
+    setTimeLeft(180);
+    setMistakes([]);
+    setGameStarted(false);
+  };
+
+  // Landing Page
+  if (!gameStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+        <div className="bg-black/20 backdrop-blur-md rounded-2xl p-8 max-w-3xl w-full mx-4 text-center">
+          <img src="/images/logo.png" alt="Logo" className="w-40 h-auto mx-auto mb-6" />
+          
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">
+            IA OU PAS ?
+          </h1>
+          
+          <div className="mb-8 text-white/90 text-xl">
+            <p className="mb-4">Pouvez-vous distinguer les vidéos générées par IA des vidéos réelles ?</p>
+            <p className="mb-4 flex items-center justify-center text-yellow-300">
+              <ShieldAlert className="w-6 h-6 mr-2" />
+              <span>Vous avez 3 minutes pour identifier 8 paires de vidéos.</span>
+            </p>
+          </div>
+          
+          <button 
+            onClick={startGame}
+            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-8 py-4 rounded-lg font-bold text-xl flex items-center justify-center mx-auto transition-all transform hover:scale-105 duration-300 shadow-lg"
+          >
+            <Play className="mr-2 w-6 h-6" />
+            COMMENCER LE TEST
+          </button>
+          
+          <div className="mt-12 text-sm text-white/60">
+            Vidéos conçues par Siloé Ralite / Site web par Nelson Remy
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (gameComplete) {
     let message = "";
@@ -191,13 +240,7 @@ function App() {
           )}
           
           <button
-            onClick={() => {
-              setCurrentRound(0);
-              setScore(0);
-              setGameComplete(false);
-              setTimeLeft(180);
-              setMistakes([]);
-            }}
+            onClick={resetGame}
             className={`bg-gradient-to-r ${gradientColors} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-6`}
           >
             Rejouer
@@ -286,7 +329,7 @@ function App() {
         </div>
       </div>
       
-        {/* Text - Bottom Right */}
+      {/* Text - Bottom Right */}
       <div className="fixed bottom-4 right-4 z-10 text-gray-400 text-sm opacity-50 font-mono">
         Vidéos conçues par Siloé Ralite / Site web par Nelson Remy
       </div>
