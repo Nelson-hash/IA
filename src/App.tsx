@@ -210,41 +210,49 @@ function App() {
 
   // Fonction pour envoyer tous les résultats en une fois
   const sendAllResults = async (results, sid) => {
-    try {
-      // Préparer les données pour user_results
-      const userResultsData = results.map(result => ({
-        session_id: sid,
-        round_number: result.round_number,
-        is_correct: result.is_correct
-      }));
-      
-      // Envoyer en bloc
-      const { error: userResultsError } = await supabase
-        .from('user_results')
-        .insert(userResultsData);
+  try {
+    console.log("Envoi des résultats:", results); // Débogage
+    
+    // Préparer les données pour user_results
+    const userResultsData = results.map(result => ({
+      session_id: sid,
+      round_number: result.round_number,
+      is_correct: result.is_correct
+    }));
+    
+    // Envoyer en bloc
+    const { error: userResultsError } = await supabase
+      .from('user_results')
+      .insert(userResultsData);
 
-      if (userResultsError) throw userResultsError;
-      
-      // Pour chaque round, mettre à jour les statistiques agrégées
-      // On fait ça en parallèle pour accélérer
-      const updatePromises = results.map(result => {
-        const updateColumn = result.is_correct ? 'correct_count' : 'incorrect_count';
-        return supabase
-          .from('round_stats')
-          .update({
-            [updateColumn]: supabase.rpc('increment_counter', {
-              row_id: result.round_number,
-              column_name: updateColumn
-            })
-          })
-          .eq('round_number', result.round_number);
-      });
-      
-      await Promise.all(updatePromises);
-    } catch (error) {
-      console.error("Erreur lors de l'envoi des résultats:", error);
+    if (userResultsError) {
+      console.error("Erreur user_results:", userResultsError);
+      throw userResultsError;
     }
-  };
+    
+    // Mettre à jour les compteurs un par un
+    for (const result of results) {
+      const updateColumn = result.is_correct ? 'correct_count' : 'incorrect_count';
+      const { error } = await supabase
+        .from('round_stats')
+        .update({
+          [updateColumn]: supabase.rpc('increment_counter', {
+            row_id: result.round_number,
+            column_name: updateColumn
+          })
+        })
+        .eq('round_number', result.round_number);
+      
+      if (error) {
+        console.error(`Erreur mise à jour pour round ${result.round_number}:`, error);
+      } else {
+        console.log(`Mise à jour réussie pour round ${result.round_number}`);
+      }
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'envoi des résultats:", error);
+  }
+};
 
   const handleChoice = async (isLeft) => {
     setIsProcessing(true); // Indiquer que le traitement est en cours
