@@ -211,46 +211,53 @@ function App() {
   // Fonction pour envoyer tous les résultats en une fois
   const sendAllResults = async (results, sid) => {
   try {
-    console.log("Envoi des résultats:", results); // Débogage
+    console.log("Envoi des résultats:", results); // Pour déboguer
     
-    // Préparer les données pour user_results
+    // Enregistrer les résultats individuels
     const userResultsData = results.map(result => ({
       session_id: sid,
       round_number: result.round_number,
       is_correct: result.is_correct
     }));
     
-    // Envoyer en bloc
-    const { error: userResultsError } = await supabase
-      .from('user_results')
-      .insert(userResultsData);
-
-    if (userResultsError) {
-      console.error("Erreur user_results:", userResultsError);
-      throw userResultsError;
-    }
+    await supabase.from('user_results').insert(userResultsData);
     
-    // Mettre à jour les compteurs un par un
+    // Mettre à jour les compteurs directement, un par un
     for (const result of results) {
-      const updateColumn = result.is_correct ? 'correct_count' : 'incorrect_count';
-      const { error } = await supabase
+      // Récupérer les valeurs actuelles
+      const { data, error: fetchError } = await supabase
         .from('round_stats')
-        .update({
-          [updateColumn]: supabase.rpc('increment_counter', {
-            row_id: result.round_number,
-            column_name: updateColumn
-          })
+        .select('correct_count, incorrect_count')
+        .eq('round_number', result.round_number)
+        .single();
+      
+      if (fetchError) {
+        console.error(`Erreur lors de la récupération du round ${result.round_number}:`, fetchError);
+        continue;
+      }
+      
+      // Déterminer le compteur à incrémenter
+      const columnToUpdate = result.is_correct ? 'correct_count' : 'incorrect_count';
+      const currentValue = data[columnToUpdate] || 0;
+      const newValue = currentValue + 1;
+      
+      // Mettre à jour directement
+      const { error: updateError } = await supabase
+        .from('round_stats')
+        .update({ 
+          [columnToUpdate]: newValue, 
+          updated_at: new Date().toISOString() 
         })
         .eq('round_number', result.round_number);
       
-      if (error) {
-        console.error(`Erreur mise à jour pour round ${result.round_number}:`, error);
+      if (updateError) {
+        console.error(`Erreur lors de la mise à jour du round ${result.round_number}:`, updateError);
       } else {
-        console.log(`Mise à jour réussie pour round ${result.round_number}`);
+        console.log(`Round ${result.round_number} mis à jour: ${columnToUpdate} = ${newValue}`);
       }
     }
   } catch (error) {
-    console.error("Erreur lors de l'envoi des résultats:", error);
+    console.error("Erreur globale lors de l'envoi des résultats:", error);
   }
 };
 
