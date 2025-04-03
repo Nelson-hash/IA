@@ -92,6 +92,11 @@ type StatType = {
   total_plays: number;
 };
 
+interface GameResult {
+  round_number: number;
+  is_correct: boolean;
+}
+
 function App() {
   const [currentRound, setCurrentRound] = useState(0);
   const [score, setScore] = useState(0);
@@ -103,23 +108,52 @@ function App() {
   const [showStats, setShowStats] = useState(false);
   const [sessionId, setSessionId] = useState('');
   const [loadingStats, setLoadingStats] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [gameResults, setGameResults] = useState<GameResult[]>([]);
 
   // Générer un ID de session unique au chargement
   useEffect(() => {
     setSessionId(uuidv4());
   }, []);
 
-  // Récupérer les statistiques globales
+  // Récupérer les statistiques globales avec mise en cache
   const fetchGlobalStats = async () => {
     try {
       setLoadingStats(true);
-      const { data, error } = await supabase
+      
+      // Vérifier s'il y a des stats en cache et si elles sont récentes (moins de 5 minutes)
+      const cachedStats = localStorage.getItem('cachedStats');
+      const cachedTime = localStorage.getItem('cachedStatsTime');
+      
+      if (cachedStats && cachedTime) {
+        const cacheAge = Date.now() - parseInt(cachedTime);
+        if (cacheAge < 300000) { // 5 minutes en millisecondes
+          setGlobalStats(JSON.parse(cachedStats));
+          setLoadingStats(false);
+          return;
+        }
+      }
+      
+      // Sinon, charger depuis Supabase avec timeout de 5 secondes
+      const statsPromise = supabase
         .from('round_stats')
         .select('*')
         .order('round_number', { ascending: true });
-
-      if (error) throw error;
-
+        
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout de chargement')), 5000)
+      );
+      
+      const { data, error } = await Promise.race([statsPromise, timeoutPromise])
+        .catch(error => {
+          console.error('Erreur ou timeout lors de la récupération des stats:', error);
+          return { data: [], error: true };
+        });
+        
+      if (error || !data) {
+        throw new Error('Erreur de chargement des statistiques');
+      }
+      
       const stats: StatType[] = data.map(item => {
         const totalPlays = item.correct_count + item.incorrect_count;
         const correctPercentage = totalPlays > 0 
@@ -132,10 +166,19 @@ function App() {
           total_plays: totalPlays
         };
       });
-
+      
+      // Mettre en cache
+      localStorage.setItem('cachedStats', JSON.stringify(stats));
+      localStorage.setItem('cachedStatsTime', Date.now().toString());
+      
       setGlobalStats(stats);
     } catch (error) {
       console.error('Erreur lors de la récupération des statistiques:', error);
+      // Utiliser le cache même s'il est ancien en cas d'erreur
+      const cachedStats = localStorage.getItem('cachedStats');
+      if (cachedStats) {
+        setGlobalStats(JSON.parse(cachedStats));
+      }
     } finally {
       setLoadingStats(false);
     }
@@ -157,51 +200,65 @@ function App() {
     };
   }, [timeLeft, gameComplete, gameStarted]);
 
-  // Charger les stats quand le jeu est terminé
+  // Envoyer tous les résultats à la fin du jeu
   useEffect(() => {
-    if (gameComplete) {
+    if (gameComplete && gameResults.length > 0 && sessionId) {
+      sendAllResults(gameResults, sessionId);
       fetchGlobalStats();
     }
-  }, [gameComplete]);
+  }, [gameComplete, gameResults, sessionId]);
+
+  // Fonction pour envoyer tous les résultats en une fois
+  const sendAllResults = async (results, sid) => {
+    try {
+      // Préparer les données pour user_results
+      const userResultsData = results.map(result => ({
+        session_id: sid,
+        round_number: result.round_number,
+        is_correct: result.is_correct
+      }));
+      
+      // Envoyer en bloc
+      const { error: userResultsError } = await supabase
+        .from('user_results')
+        .insert(userResultsData);
+
+      if (userResultsError) throw userResultsError;
+      
+      // Pour chaque round, mettre à jour les statistiques agrégées
+      // On fait ça en parallèle pour accélérer
+      const updatePromises = results.map(result => {
+        const updateColumn = result.is_correct ? 'correct_count' : 'incorrect_count';
+        return supabase
+          .from('round_stats')
+          .update({
+            [updateColumn]: supabase.rpc('increment_counter', {
+              row_id: result.round_number,
+              column_name: updateColumn
+            })
+          })
+          .eq('round_number', result.round_number);
+      });
+      
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Erreur lors de l'envoi des résultats:", error);
+    }
+  };
 
   const handleChoice = async (isLeft) => {
-    if (!sessionId) return;
+    setIsProcessing(true); // Indiquer que le traitement est en cours
     
     const currentPair = videoData[currentRound];
     const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
     const selectedVideo = isLeft ? currentPair.left.url : currentPair.right.url;
     const roundNumber = currentRound + 1;
     
-    // Enregistrer le résultat dans Supabase (user_results)
-    try {
-      const { error: userResultError } = await supabase
-        .from('user_results')
-        .insert([
-          { 
-            session_id: sessionId,
-            round_number: roundNumber, 
-            is_correct: isCorrect
-          }
-        ]);
-
-      if (userResultError) throw userResultError;
-      
-      // Mettre à jour les statistiques agrégées
-      const updateColumn = isCorrect ? 'correct_count' : 'incorrect_count';
-      const { error: statsError } = await supabase
-        .from('round_stats')
-        .update({
-          [updateColumn]: supabase.rpc('increment_counter', {
-            row_id: roundNumber,
-            column_name: updateColumn
-          })
-        })
-        .eq('round_number', roundNumber);
-
-      if (statsError) throw statsError;
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement du résultat:", error);
-    }
+    // Ajouter le résultat à la liste pour l'envoi groupé à la fin
+    setGameResults(prev => [...prev, {
+      round_number: roundNumber,
+      is_correct: isCorrect
+    }]);
     
     if (!isCorrect) {
       // Track mistakes
@@ -219,6 +276,10 @@ function App() {
     } else {
       setCurrentRound(prev => prev + 1);
     }
+    
+    // Attendre un court instant pour éviter les saccades
+    await new Promise(resolve => setTimeout(resolve, 50));
+    setIsProcessing(false);
   };
 
   const startGame = () => {
@@ -233,10 +294,14 @@ function App() {
     setMistakes([]);
     setGameStarted(false);
     setShowStats(false);
+    setGameResults([]);
     setSessionId(uuidv4()); // Générer un nouvel ID de session pour la nouvelle partie
   };
 
   const toggleStats = () => {
+    if (!showStats && !globalStats.length) {
+      fetchGlobalStats();
+    }
     setShowStats(!showStats);
   };
 
@@ -434,11 +499,12 @@ function App() {
           <button
             onClick={() => handleChoice(true)}
             className="relative group overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
+            disabled={isProcessing}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={`absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent ${isProcessing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
             <video
               src={currentPair.left.url}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${isProcessing ? 'opacity-70' : ''}`}
               autoPlay
               muted
               playsInline
@@ -450,11 +516,12 @@ function App() {
           <button
             onClick={() => handleChoice(false)}
             className="relative group overflow-hidden rounded-xl hover:scale-[1.02] transition-transform"
+            disabled={isProcessing}
           >
-            <div className="absolute inset-0 bg-gradient-to-l from-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={`absolute inset-0 bg-gradient-to-l from-blue-600/20 to-transparent ${isProcessing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`} />
             <video
               src={currentPair.right.url}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${isProcessing ? 'opacity-70' : ''}`}
               autoPlay
               muted
               playsInline
