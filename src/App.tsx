@@ -409,35 +409,69 @@ function App() {
           </button>
           
           {/* Statistiques Globales */}
-          {showStats && globalStats.length > 0 && (
-            <div className="bg-gray-100 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold mb-3">Statistiques globales</h3>
-              <div className="space-y-3">
-                {globalStats.map((stat) => (
-                  <div key={stat.round_number} className="relative pt-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-600 bg-teal-200">
-                          Question {stat.round_number}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-semibold inline-block text-teal-600">
-                          {stat.correct_percentage}% ({stat.total_plays} joueurs)
-                        </span>
-                      </div>
-                    </div>
-                    <div className="overflow-hidden h-2 mt-1 text-xs flex rounded bg-gray-300">
-                      <div 
-                        style={{ width: `${stat.correct_percentage}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500"
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+{showStats && globalStats.length > 0 && (
+  <div className="bg-gray-100 rounded-lg p-4 mb-6">
+    <h3 className="text-lg font-semibold mb-3">Statistiques globales</h3>
+    <p className="text-sm text-gray-600 mb-4">
+      Pourcentage de joueurs ayant correctement identifié la vidéo générée par IA
+    </p>
+    
+    <div className="space-y-4">
+      {globalStats.map((stat) => {
+        // Trouver les vidéos correspondantes à ce round
+        const roundData = videoData[stat.round_number - 1];
+        // Récupérer directement les URLs des vidéos pour ce round
+        const videoLeft = roundData.left.url;
+        const videoRight = roundData.right.url;
+        
+        return (
+          <div key={stat.round_number} className="bg-white p-3 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold py-1 px-2 rounded-full text-teal-600 bg-teal-100">
+                Choix {stat.round_number}
+              </span>
+              <span className="text-sm font-semibold text-teal-600">
+                {stat.correct_percentage}% ({stat.total_plays} joueurs)
+              </span>
+            </div>
+            
+            {/* Barre de progression */}
+            <div className="overflow-hidden h-2 mb-3 text-xs flex rounded bg-gray-300">
+              <div 
+                style={{ width: `${stat.correct_percentage}%` }}
+                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-teal-500"
+              ></div>
+            </div>
+            
+            {/* Vignettes des vidéos (même format que pour les erreurs) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <video
+                  src={videoLeft}
+                  className="w-full h-24 object-cover rounded-lg"
+                  muted
+                />
+                <div className="absolute bottom-0 left-0 right-0 py-1 px-2 bg-black/50 text-white text-xs rounded-b-lg">
+                  {roundData.left.correct ? "IA" : "Réelle"}
+                </div>
+              </div>
+              <div className="relative">
+                <video
+                  src={videoRight}
+                  className="w-full h-24 object-cover rounded-lg"
+                  muted
+                />
+                <div className="absolute bottom-0 left-0 right-0 py-1 px-2 bg-black/50 text-white text-xs rounded-b-lg">
+                  {roundData.right.correct ? "IA" : "Réelle"}
+                </div>
               </div>
             </div>
-          )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
           
           {/* Mistakes Overview */}
           {mistakes.length > 0 && (
