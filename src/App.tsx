@@ -132,13 +132,22 @@ function App() {
   const [loadingStats, setLoadingStats] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [gameResults, setGameResults] = useState<GameResult[]>([]);
+  // New state for randomized videos
+  const [randomizedVideos, setRandomizedVideos] = useState([...videoData]);
   
   // Détection mobile
   const isMobile = useIsMobile();
 
-  // Générer un ID de session unique au chargement
+  // Fonction pour mélanger les vidéos
+  const shuffleVideos = () => {
+    const shuffled = [...videoData].sort(() => Math.random() - 0.5);
+    setRandomizedVideos(shuffled);
+  };
+
+  // Générer un ID de session unique au chargement et mélanger les vidéos
   useEffect(() => {
     setSessionId(uuidv4());
+    shuffleVideos(); // Mélanger les vidéos au chargement initial
   }, []);
 
   // Récupérer les statistiques globales avec mise en cache
@@ -298,7 +307,7 @@ function App() {
   const handleChoice = async (isLeft) => {
     setIsProcessing(true); // Indiquer que le traitement est en cours
     
-    const currentPair = videoData[currentRound];
+    const currentPair = randomizedVideos[currentRound]; // Utiliser randomizedVideos au lieu de videoData
     const isCorrect = isLeft ? currentPair.left.correct : currentPair.right.correct;
     const selectedVideo = isLeft ? currentPair.left.url : currentPair.right.url;
     const roundNumber = currentRound + 1;
@@ -320,7 +329,7 @@ function App() {
       setScore(prev => prev + 1);
     }
 
-    if (currentRound === videoData.length - 1) {
+    if (currentRound === randomizedVideos.length - 1) { // Utiliser randomizedVideos au lieu de videoData
       setGameComplete(true);
     } else {
       setCurrentRound(prev => prev + 1);
@@ -345,6 +354,7 @@ function App() {
     setShowStats(false);
     setGameResults([]);
     setSessionId(uuidv4()); // Générer un nouvel ID de session pour la nouvelle partie
+    shuffleVideos(); // Remélanger les vidéos pour la nouvelle partie
   };
 
   const toggleStats = () => {
@@ -391,7 +401,7 @@ function App() {
 
   // Écran de jeu
   if (!gameComplete) {
-    const currentPair = videoData[currentRound];
+    const currentPair = randomizedVideos[currentRound]; // Utiliser randomizedVideos au lieu de videoData
     
     return (
       <div className="min-h-screen bg-gray-900 text-white">
@@ -399,7 +409,7 @@ function App() {
         <div className="fixed top-0 left-0 w-full h-2 bg-gray-800 z-10">
           <div 
             className="h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-300"
-            style={{ width: `${(currentRound / videoData.length) * 100}%` }}
+            style={{ width: `${(currentRound / randomizedVideos.length) * 100}%` }} // Utiliser randomizedVideos au lieu de videoData
           />
         </div>
 
@@ -559,7 +569,7 @@ function App() {
         <Icon className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto ${iconColor} mb-2 sm:mb-4`} />
         <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">{emoji}</div>
         <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">{message}</h2>
-        <p className="text-lg sm:text-xl mb-4 sm:mb-6">Score: {score} / {videoData.length}</p>
+        <p className="text-lg sm:text-xl mb-4 sm:mb-6">Score: {score} / {randomizedVideos.length}</p> {/* Utiliser randomizedVideos au lieu de videoData */}
         
         {/* Statistiques Globales Button */}
         <button
@@ -585,9 +595,9 @@ function App() {
             
             <div className="space-y-3 sm:space-y-4 max-h-60 sm:max-h-80 overflow-y-auto pr-1">
               {globalStats.map((stat) => {
-                // Trouver les vidéos correspondantes à ce round
-                const roundData = videoData[stat.round_number - 1];
-                // Récupérer directement les URLs des vidéos pour ce round
+                // Ajuster cette partie pour fonctionner avec les vidéos aléatoires
+                // Nous devons toujours référencer les vidéos originales pour les statistiques
+                const roundData = videoData[stat.round_number - 1]; // Utiliser videoData pour les statistiques
                 const videoLeft = roundData.left.url;
                 const videoRight = roundData.right.url;
                 
