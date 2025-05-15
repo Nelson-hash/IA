@@ -83,6 +83,16 @@ const videoData = [
       url: "/videos/Reel-8.mp4",
       correct: false
     }
+  },
+  {
+    left: {
+      url: "/videos/IA-9.mp4",
+      correct: true
+    },
+    right: {
+      url: "/videos/Reel-9.mp4",
+      correct: false
+    }
   }
 ];
 
