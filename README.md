@@ -1,1 +1,1 @@
-Made with the help of Bolt
+Made with the help of Bolt and Claude
