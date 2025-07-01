@@ -389,7 +389,7 @@ function App() {
             <p className="mb-3 sm:mb-4">Pouvez-vous distinguer les vidéos générées par IA des vidéos réelles ?</p>
             <p className="mb-3 sm:mb-4 flex items-center justify-center text-yellow-300">
               <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-              <span>Vous avez 3 minutes pour identifier 8 paires de vidéos.</span>
+              <span>Vous avez 3 minutes pour identifier 9 paires de vidéos.</span>
             </p>
           </div>
           
